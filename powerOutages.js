@@ -1,12 +1,14 @@
-//Set the dimensions for the canvas
-var margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = 950 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+		//Set the dimensions for the canvas
+var margin = {top: 30, right:20, bottom:30,left:50},
+	width = 600 - margin.left - margin.right,
+	height = 270 - margin.top -margin.right;
 	
-var parseTime = d3.timeParse("%x");
+	//parse the date/time
+	var parseDate = d3.timeParse("%x");
+
 	//Set the ranges
-var x = d3.scaleTime().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
+	var x = d3.scaleTime().range([0, width]);
+	var y = d3.scaleLinear().range([height,0]);
 
 
 	//Define the line
@@ -22,36 +24,38 @@ var svg = d3.select("body")
 			.append("g")
 				.attr("transform","translate(" +margin.left +","+margin.top+")");
 //Get the data
-d3.csv("../static/test_data_Texas.csv",function(error,data){
-	if(error) throw error;
-	
-	//format the data
+d3.csv("test_data_Texas.csv",function(error,data){
+	if(error) throw error
+
 	data.forEach(function(d){
-		d.date = parseTime(d.Date);
-		// console.log(d.date)
-		if  (d.Harvey_Texas_customers != "")
-			d.outages = +d.Harvey_Texas_customers;
-		console.log(d.outages)
+		if (d.Harvey_Texas_customers == "null") d.Harvey_Texas_customers = null;
+	});	
+
+	data.forEach(function(d){
+		d.date = parseDate(d.Date);
+
+		d.outages = +d.Harvey_Texas_customers;
 	});
-	
+
+
 //Scale the range of the data
 	x.domain(d3.extent(data,function(d){
 		return d.date;}));
 	y.domain([0,d3.max(data,function(d){
 		return d.outages;})]);
-
 //add the valueline path
 	svg.append("path")
 		.data([data])
-		.filter(function(d){return d.outages != "" || d.outages > 0 })
 		.attr("class", "line")
-		.attr("d",valueline);
+		.attr("d",valueline(data));
 
 //Add the X Axis
 	svg.append("g")
+		.attr("class","x axis")
 		.attr("transform","translate(0,"+height+")")
 		.call(d3.axisBottom(x));
 //Add the Y axis
 	svg.append("g")
+		.attr("class", "y axis")
 		.call(d3.axisLeft(y));
 });
