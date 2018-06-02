@@ -14,7 +14,8 @@ var margin = {top: 30, right:20, bottom:30,left:50},
 	//Define the line
 	var valueline = d3.line()
 		.x(function(d) {return x(d.date);})
-		.y(function(d) {return y(d.outages);});
+		.y(function(d) {return y(d.outages);})
+		.defined(function(d){return d.outages});
 
 //Add the svg canvas
 var svg = d3.select("body")
@@ -28,25 +29,28 @@ d3.csv("test_data_Texas.csv",function(error,data){
 	if(error) throw error
 
 	data.forEach(function(d){
-		if (d.Harvey_Texas_customers == "null") d.Harvey_Texas_customers = null;
-	});	
-
-	data.forEach(function(d){
 		d.date = parseDate(d.Date);
 
+		if (d.Harvey_Texas_customers == "null") {
+			d.Harvey_Texas = null;
+		}
 		d.outages = +d.Harvey_Texas_customers;
+
+		console.log("Outages: ",d.outages);
 	});
-
-
+	
 //Scale the range of the data
 	x.domain(d3.extent(data,function(d){
 		return d.date;}));
 	y.domain([0,d3.max(data,function(d){
-		return d.outages;})]);
+		return d.outages; })]);
 //add the valueline path
+	//svg.filter(function(d) {return d.Harvey_Texas_customers === 0}).remove()
+
 	svg.append("path")
 		.data([data])
 		.attr("class", "line")
+
 		.attr("d",valueline(data));
 
 //Add the X Axis
@@ -58,4 +62,6 @@ d3.csv("test_data_Texas.csv",function(error,data){
 	svg.append("g")
 		.attr("class", "y axis")
 		.call(d3.axisLeft(y));
+
+
 });
