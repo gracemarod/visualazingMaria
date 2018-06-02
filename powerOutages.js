@@ -25,16 +25,16 @@ var svg = d3.select("body")
 			.append("g")
 				.attr("transform","translate(" +margin.left +","+margin.top+")");
 //Get the data
-d3.csv("test_data_Texas.csv",function(error,data){
+d3.csv("electricOutages_v4.csv",function(error,data){
 	if(error) throw error
 
 	data.forEach(function(d){
 		d.date = parseDate(d.Date);
 
-		if (d.Harvey_Texas_customers == "null") {
+		if (d.Harvey_Texas === "null") {
 			d.Harvey_Texas = null;
 		}
-		d.outages = +d.Harvey_Texas_customers;
+		d.outages = +d.Harvey_Texas;
 
 		console.log("Outages: ",d.outages);
 	});
