@@ -23,7 +23,7 @@ var svg = d3.select("svg"),
 
     //Get the data
 
-d3.csv("test_data_Texas.csv",type,function(error,data){
+d3.csv("electricOutages_v4.csv",type,function(error,data){
 	if(error) throw error
 
 
