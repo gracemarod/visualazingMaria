@@ -12,29 +12,25 @@ var svg = d3.select("svg"),
 	//Set the ranges
 	var x = d3.scaleTime().range([0, width]),
 		y = d3.scaleLinear().range([height,0]),
+		//Z is to add ranges of colors to the line
 		z = d3.scaleOrdinal(d3.schemeCategory10);
 
 	//Define the line
 	var line = d3.line()
 		.x(function(d) {return x(d.date);})
 		.y(function(d) {return y(d.outages);})
+		//Define is used to omit the null/zero values from appearing in the graph
 		.defined(function(d){return d.outages});
 
 
-    //Get the data
-
+    
+    //Get the data, call type function to properly format and convert the values
 d3.csv("electricOutages_v4.csv",type,function(error,data){
 	if(error) throw error
-
-
-		// d.date = parseDate(d.Date);
-
-		// if (d.Harvey_Texas === "null") {
-		// 	d.Harvey_Texas = null;
-		// }
-
+		//we have to mapped the values of the columns to one variable
 		var cities = data.columns.slice(1).map(function(id)
 			{
+				//identify the objects, and use another map function to mapped teh right value to the city
 				return {
 					id:id,
 					values: data.map(function(d){
@@ -42,9 +38,6 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 					})
 				};
 			});
-		//d.outages = +d.Harvey_Texas;
-
-		// console.log("Outages: ",d.outages);
 
 	
 //Scale the range of the data
@@ -52,28 +45,28 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 		return d.date;}));
 
 	y.domain([
+		//find the min value of the power outages and maxium power outages for the domain of y
 			d3.min(cities, function(c){return d3.min(c.values,function(d){return d.outages;});}),
 			d3.max(cities, function(c){return d3.max(c.values, function(d){return d.outages;});})
 		]);
+	//return different colors to each different column (city)
 	z.domain(cities.map(function(c){return c.id;}));
-
-//add the valueline path
-
-	// svg.append("path")
-	// 	.data([data])
-	// 	.attr("class", "line")
-
-	// 	.attr("d",valueline(data));
 
 //Add the X Axis
 	g.append("g")
 		.attr("class","axis axis--x")
 		.attr("transform","translate(0,"+height+")")
 		.call(d3.axisBottom(x));
+
 //Add the Y axis
 	g.append("g")
 		.attr("class", "axis axis--y")
-		.call(d3.axisLeft(y));
+		.call(d3.axisLeft(y))
+		.append("text")
+		.attr("transform","rotate(-90)")
+		.attr("y",10)
+		.attr("fill","#000")
+		.text("Power Outages");
 
 	var city = g.selectAll(".city")
 				.data(cities)
@@ -84,8 +77,17 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 		.attr("class","line")
 		.attr("d", function(d){return line(d.values);})
 		.style("stroke",function(d){return z(d.id);});
+//add label to the x axis
+	city.append("text")
+		.datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
+		.attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.outages) + ")"; })
+		.attr("x",1)
+		.attr("dy","0.35em")
+		.style("font", "10px sans-serif")
+		.text(function(d){return d.id;});
 });
 
+//External function to convert values to integers, parese the date properly and "null" string to 0
 function type(d, _, columns){
 	d.date = parseDate(d.date);
 	for (var i = 1, n = columns.length, c; i < n; ++i) {
