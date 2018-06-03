@@ -17,8 +17,8 @@ var svg = d3.select("svg"),
 	//Define the line
 	var line = d3.line()
 		.x(function(d) {return x(d.date);})
-		.y(function(d) {return y(d.outages);});
-		//.defined(function(d){return d.outages});
+		.y(function(d) {return y(d.outages);})
+		.defined(function(d){return d.outages});
 
 
     //Get the data
@@ -89,5 +89,8 @@ d3.csv("test_data_Texas.csv",type,function(error,data){
 function type(d, _, columns){
 	d.date = parseDate(d.date);
 	for (var i = 1, n = columns.length, c; i < n; ++i) {
+			if (d[c = columns[i]] == "null"){
+				d[c = columns[i]] = 0;
+			}
 			d[c = columns[i]] = +d[c]};
   return d;}
