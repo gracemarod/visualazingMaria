@@ -74,34 +74,40 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 				.attr("class","city");
 
 	city.append("path")
+
 		.attr("class","line")
-		.attr("d", function(d){return line(d.values);})
-		.style("stroke",function(d){return z(d.id);});
+		.style("stroke",function(d){return z(d.id);})
+		.attr("id", function(d){return 'tag'+ d.id.replace(/\s+/g, '')} ) // assign an ID
+		.attr("d", function(d){return line(d.values);});
+
 //add label to the x axis
 	city.append("text")
 		.datum(function(d,i) { 
 			// console.log("ID ",d.id, "I ", i)
 			return {id: d.id, value: d.values, inx:i}; })
-		// .attr("transform", function(d) { 
-				// for(var j = 0; j < d.id.length; j++){
-				// 	console.log("Test: ", d.id, j);
-				// 	console.log("cities: ",cities)
-				// } 
-			// console.log("ID: ",d.id, "outages: ",d.values)
-			// console.log("Inx2: ", d.inx)
-			// return "translate(" + x(d.value.date) + "," + y(d.value.outages) + ")"; })
 		.attr("x",width - margin.right)
-		.attr("y",function(d){return 12.5 * d.inx})
-		 		// for(var j = 0; j < d.id.length; j++){
-					// console.log("Test: ", d.id, j);
-					// console.log("cities: ",cities)
-					// console.log("Index: ", cities.indexOf(d.id))
-					// return 12.5 * j;
-				// } 
-			
-		.style("font", "10px sans-serif")
+		.attr("y",function(d){return 12.5 * d.inx})			
+		.attr("class","legend")
+		.attr("id", function(d){return 'hurricaneState'+ d.id.replace(/\s+/g, '')} ) // assign an ID
+		.style("font", "12px sans-serif")
 		.style("fill", function(d) { // Add the colours dynamically
                 return d.color = z(d.id); })
+		.on("click", function(d){
+			var active = d.active?false:true,
+			newOpacity = active? 0:1;
+			newOpacityText = active? 0.5:1;
+			//Hide or show the elements based on the ID
+			console.log("#tag" + d.id.replace(/\s+/g,''))
+			d3.select("#tag" + d.id.replace(/\s+/g,''))
+			.transition().duration(100)
+			.style("opacity",newOpacity);
+
+			d3.select("#hurricaneState" + d.id.replace(/\s+/g,'') )
+			.transition().duration(100)
+			.style("opacity",newOpacityText);
+			//Update whether or not the elements are active
+			d.active = active;
+		})
 		.text(function(d){return d.id;});
 });
 
