@@ -1,7 +1,7 @@
 		//Set the dimensions for the canvas
 	//Add the svg canvas
 var svg = d3.select("svg"),
-    margin = {top: 20, right: 80, bottom: 30, left: 50},
+    margin = {top: 20, right: 80, bottom: 30, left: 80},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -67,7 +67,7 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 		.attr("y",10)
 		.attr("fill","#000")
 		.text("Power Outages");
-
+	console.log("Wepa");
 	var city = g.selectAll(".city")
 				.data(cities)
 				.enter().append("g")
@@ -79,11 +79,29 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 		.style("stroke",function(d){return z(d.id);});
 //add label to the x axis
 	city.append("text")
-		.datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
-		.attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.outages) + ")"; })
-		.attr("x",1)
-		.attr("dy","0.35em")
+		.datum(function(d,i) { 
+			// console.log("ID ",d.id, "I ", i)
+			return {id: d.id, value: d.values, inx:i}; })
+		// .attr("transform", function(d) { 
+				// for(var j = 0; j < d.id.length; j++){
+				// 	console.log("Test: ", d.id, j);
+				// 	console.log("cities: ",cities)
+				// } 
+			// console.log("ID: ",d.id, "outages: ",d.values)
+			// console.log("Inx2: ", d.inx)
+			// return "translate(" + x(d.value.date) + "," + y(d.value.outages) + ")"; })
+		.attr("x",width - margin.right)
+		.attr("y",function(d){return 12.5 * d.inx})
+		 		// for(var j = 0; j < d.id.length; j++){
+					// console.log("Test: ", d.id, j);
+					// console.log("cities: ",cities)
+					// console.log("Index: ", cities.indexOf(d.id))
+					// return 12.5 * j;
+				// } 
+			
 		.style("font", "10px sans-serif")
+		.style("fill", function(d) { // Add the colours dynamically
+                return d.color = z(d.id); })
 		.text(function(d){return d.id;});
 });
 
