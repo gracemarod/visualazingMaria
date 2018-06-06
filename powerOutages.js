@@ -1,7 +1,7 @@
 		//Set the dimensions for the canvas
 	//Add the svg canvas
 var svg = d3.select("svg"),
-    margin = {top: 20, right: 80, bottom: 30, left: 80},
+    margin = {top: 50, right: 80, bottom: 60, left: 100},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -56,7 +56,13 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 	g.append("g")
 		.attr("class","axis axis--x")
 		.attr("transform","translate(0,"+height+")")
-		.call(d3.axisBottom(x));
+		.call(d3.axisBottom(x))
+		.append("text")
+		.attr("fill","#000")
+		.attr("x",width/2)
+		.attr("y",40)
+		.style("font", "14px sans-serif")
+		.text("Date");
 
 //Add the Y axis
 	g.append("g")
@@ -64,8 +70,10 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 		.call(d3.axisLeft(y))
 		.append("text")
 		.attr("transform","rotate(-90)")
-		.attr("y",10)
+		.attr("y",-65)
+		.attr("x",-(height/2) +40)
 		.attr("fill","#000")
+		.style("font", "14px sans-serif")
 		.text("Power Outages");
 	console.log("Wepa");
 	var city = g.selectAll(".city")
@@ -74,24 +82,71 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 				.attr("class","city");
 
 	city.append("path")
-
 		.attr("class","line")
 		.style("stroke",function(d){return z(d.id);})
 		.attr("id", function(d){return 'tag'+ d.id.replace(/\s+/g, '')} ) // assign an ID
 		.attr("d", function(d){return line(d.values);});
 
+//add circles
+	// city.selectAll("dot")
+	// 	.data(data)
+	// 	.enter().append("circle")
+	// 	.attr("r",3)
+	// 	.attr("cx",function(d){return x(d.date)})
+	// 	.attr("cy",function(d,i,j){
+	// 		var dKeys = ["Harvey_Texas","Harvey_Louisiana","Irma_PuertoRico","Irma_StCroix","Irma_StJohn","Irma_StThomas","Irma_Florida","Irma_Georgia","Irma_SouthCarolina","Irma_NorthCarolina","Irma_Alabama","Maria_PuertoRico","Maria_StThomas","Maria_StJohn","Maria_StCroix","Nate_Alabama","Nate_Florida","Nate_Mississippi"]
+			
+	// 		// for (var i = 1; i < dKeys.length;i++ ){
+	// 			console.log("d: ",d)
+	// 			console.log("State: ", dKeys[i%17], "D: ",d[dKeys[i%17]] )
+	// 			return y(d[dKeys[i%17]])
+	// 		// }
+	// 		// console.log(d.Harvey_Texas)
+			
+	// 		});
+
+
+//add title
+	var title = "Power Outages Comparision in Hurricane Season 2017";
+	  g.append("text")
+		.attr("x",175)
+		.attr("y",-25)
+		.style("font", "16px sans-serif")
+		.style("fill", "#000" )
+		.text(title);
+
+
+//add rectangles for legend
+	city.append("rect")
+		.datum(function(d,i) { 
+			// console.log("ID ",d.id, "I ", i)
+			return {id: d.id, inx:i}; })
+		.attr("x",width - margin.right - 15)
+		.attr("y",function(d){return 15 * d.inx - 9})
+		.attr("width", 10)
+        .attr("height", 10)
+        .attr("id", function(d){return 'legendSquare'+ d.id.replace(/\s+/g, '')} ) 
+        .style("fill", function(d) { // Add the colours dynamically
+                return d.color = z(d.id); });
+
+   g.append("text")
+	.attr("x",width - margin.right -15)
+	.attr("y",-15)
+	.attr("class","legend")
+	.style("font", "11px sans-serif")
+	.style("fill", "black" )
+	.text("Hurricane_affected state/island");
 //add label to the x axis
 	city.append("text")
 		.datum(function(d,i) { 
 			// console.log("ID ",d.id, "I ", i)
-			return {id: d.id, value: d.values, inx:i}; })
+			return {id: d.id, inx:i}; })
 		.attr("x",width - margin.right)
-		.attr("y",function(d){return 12.5 * d.inx})			
+		.attr("y",function(d){return 15 * d.inx })			
 		.attr("class","legend")
 		.attr("id", function(d){return 'hurricaneState'+ d.id.replace(/\s+/g, '')} ) // assign an ID
 		.style("font", "12px sans-serif")
-		.style("fill", function(d) { // Add the colours dynamically
-                return d.color = z(d.id); })
+		.style("fill", "#000" )
 		.on("click", function(d){
 			var active = d.active?false:true,
 			newOpacity = active? 0:1;
@@ -105,11 +160,19 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 			d3.select("#hurricaneState" + d.id.replace(/\s+/g,'') )
 			.transition().duration(100)
 			.style("opacity",newOpacityText);
+
+			d3.select("#legendSquare" + d.id.replace(/\s+/g,'') )
+			.transition().duration(100)
+			.style("opacity",newOpacityText);
 			//Update whether or not the elements are active
 			d.active = active;
 		})
 		.text(function(d){return d.id;});
+
 });
+
+
+
 
 //External function to convert values to integers, parese the date properly and "null" string to 0
 function type(d, _, columns){
