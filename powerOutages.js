@@ -39,7 +39,6 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 				};
 			});
 
-
 //Scale the range of the data
 	x.domain(d3.extent(data,function(d){
 		return d.date;}));
@@ -51,13 +50,8 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
       });}),
       //Trying to filter cities with tope 10 (or 8) of amount of values
 			d3.max(cities, function(c){
-          var count = 0;
-          for (var i =0; i < c.values.length;i++){
-            if (c.values[i].outages != 0) {
-              count+=1;
-            }
-          }
-          console.log(c.id ,count);
+
+          // console.log(c.id ,count);
 
         return d3.max(c.values, function(d){return d.outages;});})
 		]);
@@ -91,11 +85,25 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 	var city = g.selectAll(".city")
 				.data(cities)
 				.enter().append("g")
+        //Filter so only cities with 8 or more outages appear
+        .filter(function(d){
+          var count = 0;
+          for (var i =0; i < d.values.length;i++){
+            if (d.values[i].outages != 0) {
+              count+=1;
+            }
+          }
+          if(count>=8) return d.values;
+        })
 				.attr("class","city");
 
+//drawing lines for cities
 	city.append("path")
 		.attr("class","line")
-		.style("stroke",function(d){return z(d.id);})
+		.style("stroke",function(d){
+      if (d.id=="Maria_PuertoRico")return d.color = '#FF7900';
+      else if (d.id=="Irma_PuertoRico") return d.color = '#825200';
+      else return z(d.id);})
 		.attr("id", function(d){return 'tag'+ d.id.replace(/\s+/g, '')} ) // assign an ID
 		.attr("d", function(d){return line(d.values);});
 
@@ -126,23 +134,23 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 		.style("font", "16px sans-serif")
 		.style("fill", "#000" )
 		.text(title);
- console.log("Cities: ",city._groups);
-for (var i = 0; i <city.length; i++){
-  console.log(city[i]);
-}
 
 //add rectangles for legend
 	city.append("rect")
 		.datum(function(d,i) {
 			// console.log("ID ",d.id, "I ", i)
-			return {id: d.id, inx:i}; })
+      return {id: d.id, inx:i}; })
+
 		.attr("x",width - margin.right - 15)
 		.attr("y",function(d){return 15 * d.inx - 9})
 		.attr("width", 10)
         .attr("height", 10)
         .attr("id", function(d){return 'legendSquare'+ d.id.replace(/\s+/g, '')} )
         .style("fill", function(d) { // Add the colors dynamically
-                return d.color = z(d.id); });
+                console.log(d);
+                if (d.id=="Maria_PuertoRico") return d.color = '#FF8100';
+                else if (d.id=="Irma_PuertoRico") return d.color = '#825200';
+                else return d.color = z(d.id); });
 
    g.append("text")
 	.attr("x",width - margin.right -15)
@@ -154,7 +162,9 @@ for (var i = 0; i <city.length; i++){
 //add label to the x axis
 	city.append("text")
 		.datum(function(d,i) {
+
 			// console.log("ID ",d.id, "I ", i)
+
 			return {id: d.id, inx:i}; })
 		.attr("x",width - margin.right)
 		.attr("y",function(d){return 15 * d.inx })
@@ -196,3 +206,5 @@ function type(d, _, columns){
 			}
 			d[c = columns[i]] = +d[c]};
   return d;}
+
+//count how many ocurrences each place/hurricanse has to filter top 8
