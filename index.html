@@ -2,30 +2,49 @@
 <meta charset="utf-8">
 <html lang="en">
 
-<style> /* set the CSS */
-.line {
-    fill: none;
-    stroke: steelblue;
-    stroke-width: 3px;
-}
 
-.legend{
-	font-size:16px;
-	/*font-weight: bold;*/
-}
-</style>
 <head>
 
 	<title>Visualazing Maria</title>
 
-
 </head>
 <body>
-	<!-- <h1>Hello there!</h1> -->
-	<svg width="960" height="500"></svg>
+
+
+
+
+	<svg width="960" height="500">
+    <path id="gap-line" />
+  </svg>
+
+
+  <style> /* set the CSS */
+  .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 3px;
+  }
+
+  .legend{
+  	font-size:16px;
+  	/*font-weight: bold;*/
+  }
+  /* path {
+    stroke-linecap: round; /* this is necessary to show lines with no length */
+    fill: none;
+  } */
+  #gap-line {
+    margin-left: 1000;
+    stroke-width: 3px;
+    stroke: #ff0000;
+    stroke-dasharray: 3 4;
+    opacity: 0.4;
+  }
+  </style>
 	<script src="http://d3js.org/d3.v4.min.js"></script>
   <!-- <script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script> -->
   <!-- <script src="https://d3js.org/d3-interpolate.v1.min.js"></script> -->
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 	<script type="text/javascript" src="powerOutages.js"></script>
 <!-- 	<script>
 

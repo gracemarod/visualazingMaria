@@ -6,6 +6,7 @@ var svg = d3.select("svg"),
     height = svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
 	//parse the date/time
 	var parseDate = d3.timeParse("%x");
 
@@ -15,13 +16,17 @@ var svg = d3.select("svg"),
 		//Z is to add ranges of colors to the line
 		z = d3.scaleOrdinal(d3.schemeCategory10);
 
+    var testBoolArr = [true, true, true, true, true, true, false,false,true];
 	//Define the line
 	var line = d3.line()
 		.x(function(d) {return x(d.date);})
 		.y(function(d) {return y(d.outages);})
 		//Define is used to omit the null/zero values from appearing in the graph
-		.defined(function(d){return d.outages});
+		.defined(function(d){ return d.outages});
 
+  var dashedLine = d3.line()
+                    //Define is used to omit the null/zero values from appearing in the graph
+                    .defined(function(d){ return d[0] !== 0});
 
 
     //Get the data, call type function to properly format and convert the values
@@ -82,30 +87,61 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 		.style("font", "14px sans-serif")
 		.text("Power Outages");
 
+
+//Get cities id of top outage sin seperate array
+  var filteredCities = [];
 	var city = g.selectAll(".city")
 				.data(cities)
 				.enter().append("g")
         //Filter so only cities with 8 or more outages appear
         .filter(function(d){
           var count = 0;
+
           for (var i =0; i < d.values.length;i++){
             if (d.values[i].outages != 0) {
+              // console.log("Values: ",d.id,d.values[i].outages );
               count+=1;
+              ;
             }
           }
-          if(count>=8) return d.values;
+          if(count>=8) {
+            filteredCities.push(d.id);
+            return d.values};
         })
 				.attr("class","city");
 
 //drawing lines for cities
 	city.append("path")
 		.attr("class","line")
+    // .style("stroke-dasharray", function(d) { })
 		.style("stroke",function(d){
+      var lineType;
+      // console.log("Stoy un poco peldia: ", d.values);
       if (d.id=="Maria_PuertoRico")return d.color = '#FF7900';
       else if (d.id=="Irma_PuertoRico") return d.color = '#825200';
-      else return z(d.id);})
+      else return z(d.id);
+    })
 		.attr("id", function(d){return 'tag'+ d.id.replace(/\s+/g, '')} ) // assign an ID
 		.attr("d", function(d){return line(d.values);});
+
+//taking all of the dates and outages and saving them in a seperate array in the most inefficient way possible
+// var filterCityValues = []
+// for (var i =0;i <cities.length;i++ ){
+//      for (var j = 0; j< cities[i].values.length;j++ ){
+//        if (filteredCities.includes(cities[i].id) )
+//         filterCityValues.push([x(cities[i].values[j].date),y(cities[i].values[j].outages)]);
+//      }
+// }
+
+// var filteredData = filterCityValues.filter(dashedLine.defined());
+// console.log("pls: ", filteredData);
+// d3.select('#gap-line')
+//   .attr('d', dashedLine(filteredData));
+
+
+
+
+
 
 //add circles
 	// city.selectAll("dot")
@@ -147,7 +183,6 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
         .attr("height", 10)
         .attr("id", function(d){return 'legendSquare'+ d.id.replace(/\s+/g, '')} )
         .style("fill", function(d) { // Add the colors dynamically
-                console.log(d);
                 if (d.id=="Maria_PuertoRico") return d.color = '#FF8100';
                 else if (d.id=="Irma_PuertoRico") return d.color = '#825200';
                 else return d.color = z(d.id); });
@@ -177,7 +212,6 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 			newOpacity = active? 0:1;
 			newOpacityText = active? 0.5:1;
 			//Hide or show the elements based on the ID
-			console.log("#tag" + d.id.replace(/\s+/g,''))
 			d3.select("#tag" + d.id.replace(/\s+/g,''))
 			.transition().duration(100)
 			.style("opacity",newOpacity);
@@ -206,5 +240,3 @@ function type(d, _, columns){
 			}
 			d[c = columns[i]] = +d[c]};
   return d;}
-
-//count how many ocurrences each place/hurricanse has to filter top 8
