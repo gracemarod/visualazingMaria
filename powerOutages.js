@@ -24,12 +24,17 @@ var svg = d3.select("svg"),
 		//Define is used to omit the null/zero values from appearing in the graph
 		.defined(function(d){ return d.outages});
 
-  var dashedLine = d3.line()
-                    //Define is used to omit the null/zero values from appearing in the graph
-                    .defined(function(d){ return d[0] !== 0});
 
+  // var dashedLine = d3.line()
+  //                   //Define is used to omit the null/zero values from appearing in the graph
+  //                   .defined(function(d){ return d[0] !== 0});
 
-    //Get the data, call type function to properly format and convert the values
+// function declaration for div that is being attached to the body element
+var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity",0);
+
+//Get the data, call type function to properly format and convert the values
 d3.csv("electricOutages_v4.csv",type,function(error,data){
 	if(error) throw error
 		//we have to mapped the values of the columns to one variable
@@ -122,7 +127,13 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
       else return z(d.id);
     })
 		.attr("id", function(d){return 'tag'+ d.id.replace(/\s+/g, '')} ) // assign an ID
-		.attr("d", function(d){return line(d.values);});
+		.attr("d", function(d){
+      // for (var i = 0; i < d.values.length; i++){
+      // console.log(i, " vals: ", x(d.values[i].date));
+      //   }
+        return line(d.values);
+    });
+
 
 //taking all of the dates and outages and saving them in a seperate array in the most inefficient way possible
 // var filterCityValues = []
@@ -139,27 +150,6 @@ d3.csv("electricOutages_v4.csv",type,function(error,data){
 //   .attr('d', dashedLine(filteredData));
 
 
-
-
-
-
-//add circles
-	// city.selectAll("dot")
-	// 	.data(data)
-	// 	.enter().append("circle")
-	// 	.attr("r",3)
-	// 	.attr("cx",function(d){return x(d.date)})
-	// 	.attr("cy",function(d,i,j){
-	// 		var dKeys = ["Harvey_Texas","Harvey_Louisiana","Irma_PuertoRico","Irma_StCroix","Irma_StJohn","Irma_StThomas","Irma_Florida","Irma_Georgia","Irma_SouthCarolina","Irma_NorthCarolina","Irma_Alabama","Maria_PuertoRico","Maria_StThomas","Maria_StJohn","Maria_StCroix","Nate_Alabama","Nate_Florida","Nate_Mississippi"]
-
-	// 		// for (var i = 1; i < dKeys.length;i++ ){
-	// 			console.log("d: ",d)
-	// 			console.log("State: ", dKeys[i%17], "D: ",d[dKeys[i%17]] )
-	// 			return y(d[dKeys[i%17]])
-	// 		// }
-	// 		// console.log(d.Harvey_Texas)
-
-	// 		});
 
 
 //add title
